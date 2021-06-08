@@ -133,6 +133,7 @@ class CustomBaseHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
             <!DOCTYPE html>
             <html>
             <head>
+                <link rel="icon" href="data:;base64,=">
                 <title>Microsoft-HTTPAPI/2.0</title>
             </head>
             <body>
