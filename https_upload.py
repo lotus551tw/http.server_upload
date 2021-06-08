@@ -58,7 +58,8 @@ class CustomBaseHTTPRequestHandler(http.server.BaseHTTPRequestHandler):
             }
         )
 
-        dir_path = os.path.dirname(os.path.realpath(__file__))
+        #dir_path = os.path.dirname(os.path.realpath(__file__))
+        dir_path = os.getcwd() + re.split(r'\?|\#', self.path)[0] #use working directory to store downloaded files
         file_name = urllib.parse.unquote(post_form["file"].filename)
 
         with open(dir_path + self.path + file_name, 'wb') as file_object:
