@@ -159,7 +159,11 @@ def start_https_server(listening_port, basic_authentication_key, certificate_fil
 
     https_server = http.server.HTTPServer(("0.0.0.0", listening_port), CustomBaseHTTPRequestHandler)
     if certificate_file:
-        https_server.socket = ssl.wrap_socket(https_server.socket, certfile=certificate_file, keyfile=key_file, server_side=True)
+        context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+        context.load_cert_chain(certfile=certificate_file, keyfile=key_file)
+        https_server.socket = context.wrap_socket(https_server.socket, server_side=True)
+        # ssl.wrap_socket() is deprecated since version 3.7
+        #https_server.socket = ssl.wrap_socket(https_server.socket, certfile=certificate_file, keyfile=key_file, server_side=True)
 
     try:
         https_server.serve_forever()
@@ -174,12 +178,12 @@ if __name__ == '__main__':
     # TODO: add fix for path traversal
     # openssl req -new -x509 -keyout .config/https_upload/server.pem -out .config/https_upload/server.pem -days 365 -nodes -subj "/C=/ST=/O=/OU=/CN="
     if len(sys.argv) < 4:
-        print("[-] USAGE: {} <PORT> <USERNAME:PASSWORD> [CERTIFICATE FILE] [KEY FILE]".format(sys.argv[0]))
+        print("[-] USAGE: {} <PORT> <USERNAME:PASSWORD> <CERTIFICATE FILE> [KEY FILE]".format(sys.argv[0]))
         sys.exit(1)
 
     listening_port = int(sys.argv[1])
     basic_authentication_key = base64.b64encode(sys.argv[2].encode("utf-8"))  # binary
-    certificate_file = sys.argv[3] if len(sys.argv) == 5 else False
-    key_file = sys.argv[4] if len(sys.argv) == 5 else False
+    certificate_file = sys.argv[3]
+    key_file = sys.argv[4] if len(sys.argv) == 5 else None
     print("[+] Staring server...")
     start_https_server(listening_port, basic_authentication_key, certificate_file, key_file)
